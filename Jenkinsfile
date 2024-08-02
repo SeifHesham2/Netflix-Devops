@@ -49,7 +49,7 @@ pipeline {
                 script {
                     echo 'Deploying to Kubernetes...'
                     // Ensure environment variables are set for envsubst
-                    sh 'envsubst < deployment.yaml | kubectl apply -f -'
+                    sh 'envsubst < deployment.yaml | kubectl apply -f deployment.yaml'
                     sh 'kubectl apply -f service.yaml'
                 }
             }
