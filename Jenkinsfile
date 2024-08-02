@@ -1,24 +1,22 @@
-pipeline{
-    environment{
-    NodejsHome= tool "myNode"
-    dockerHome = tool "myDocker"
-    PATH = "${dockerHome}/bin:${NodejsHome}/bin:${PATH}"
+pipeline {
+    environment {
+        NodejsHome = tool "myNode"
+        dockerHome = tool "myDocker"
+        PATH = "${dockerHome}/bin:${NodejsHome}/bin:${PATH}"
     }
     agent any
 
-    stages{
-
+    stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        stage("Build"){
-            steps{
+        stage('Build') {
+            steps {
                 sh "npm install"
             }
         }
-
         stage('Build Docker Image') {
             steps {
                 script {
@@ -27,7 +25,6 @@ pipeline{
                 }
             }
         }
-
         stage('Push Docker Image') {
             steps {
                 script {
@@ -38,26 +35,25 @@ pipeline{
                 }
             }
         }
-
         stage('Start Minikube') {
             steps {
                 script {
                     echo 'Starting Minikube...'
-                    sh 'minikube start'
+                    // Ensure minikube is properly configured with any needed options
+                    sh 'minikube start --driver=docker'
                 }
             }
         }
-
         stage('Deploy to Kubernetes') {
             steps {
                 script {
                     echo 'Deploying to Kubernetes...'
+                    // Ensure environment variables are set for envsubst
                     sh 'envsubst < deployment.yaml | kubectl apply -f -'
                     sh 'kubectl apply -f service.yaml'
                 }
             }
         }
-
         stage('Verify Deployment') {
             steps {
                 script {
@@ -65,13 +61,6 @@ pipeline{
                     sh 'kubectl get pods'
                     sh 'kubectl get services'
                 }
-            }
-        }
-    }
-        
-        stage("Deploy"){
-            steps{
-                echo "Deploying"
             }
         }
     }
