@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: Netflix
-          image: nginx:1.14.2
+          image: seifseddik120/netflix-2024:${BUILD_NUMBER}
           ports:
             - containerPort: 80

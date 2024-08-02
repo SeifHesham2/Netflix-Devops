@@ -1,21 +1,74 @@
 pipeline{
     environment{
-     NodejsHome= tool "myNode"
-     PATH = "${NodejsHome}/bin:${PATH}"   
+    NodejsHome= tool "myNode"
+    dockerHome = tool "myDocker"
+    PATH = "${dockerHome}/bin:${NodejsHome}/bin:${PATH}"
     }
     agent any
-  
+
     stages{
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
         stage("Build"){
             steps{
                 sh "npm install"
             }
         }
-        stage("Test"){
-            steps{
-                echo "Testing"
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    echo 'Building Docker image...'
+                    dockerImage = docker.build("seifseddik120/netflix-2024:${env.BUILD_NUMBER}")
+                }
             }
         }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    echo 'Pushing Docker image to registry...'
+                    docker.withRegistry('', 'DockerHub') {
+                        dockerImage.push()
+                    }
+                }
+            }
+        }
+
+        stage('Start Minikube') {
+            steps {
+                script {
+                    echo 'Starting Minikube...'
+                    sh 'minikube start'
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    echo 'Deploying to Kubernetes...'
+                    sh 'envsubst < deployment.yaml | kubectl apply -f -'
+                    sh 'kubectl apply -f service.yaml'
+                }
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                script {
+                    echo 'Verifying deployment...'
+                    sh 'kubectl get pods'
+                    sh 'kubectl get services'
+                }
+            }
+        }
+    }
+        
         stage("Deploy"){
             steps{
                 echo "Deploying"
