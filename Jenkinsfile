@@ -13,25 +13,28 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Build') {
+        stage('Install Dependencies') {
             steps {
-                sh "npm install"
-                env.VITE_APP_TMDB_V3_API_KEY = env.TMDB_V3_API_KEY
-                
-                    }        }
+                script {
+                    echo 'Installing npm dependencies...'
+                    sh 'npm install'
+                }
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    dockerImage = docker.build("seifseddik120/netflix-2024:${env.BUILD_NUMBER}")
+                    def imageTag = "${env.BUILD_NUMBER}"
+                    dockerImage = docker.build("seifseddik120/netflix-2024:${imageTag}")
                 }
             }
         }
         stage('Push Docker Image') {
             steps {
                 script {
-                    echo 'Pushing Docker image to registry...'
-                    docker.withRegistry('', 'DockerHub') {
+                    echo 'Pushing Docker image to DockerHub...'
+                    docker.withRegistry('https://index.docker.io/v1/', 'DockerHub') {
                         dockerImage.push()
                     }
                 }
@@ -41,7 +44,6 @@ pipeline {
             steps {
                 script {
                     echo 'Starting Minikube...'
-                    // Ensure minikube is properly configured with any needed options
                     sh 'minikube start --driver=docker'
                 }
             }
@@ -50,8 +52,7 @@ pipeline {
             steps {
                 script {
                     echo 'Deploying to Kubernetes...'
-                    // Ensure environment variables are set for envsubst
-                    sh 'envsubst < deployment.yaml | kubectl apply -f deployment.yaml'
+                    sh 'envsubst < deployment.yaml | kubectl apply -f -'
                     sh 'kubectl apply -f service.yaml'
                 }
             }
