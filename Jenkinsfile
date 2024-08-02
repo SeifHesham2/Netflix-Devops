@@ -1,8 +1,10 @@
 pipeline{
-    agent any
-    tools{
-        nodejs "node"
+    environment{
+     NodejsHome= tool "myNode"
+     PATH = "${NodejsHome}/bin:${PATH}"   
     }
+    agent any
+  
     stages{
         stage("Build"){
             steps{
