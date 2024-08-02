@@ -24,9 +24,13 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    echo 'Building Docker image...'
-                    def imageTag = "${env.BUILD_NUMBER}"
-                    dockerImage = docker.build("seifseddik120/netflix-2024:${imageTag}")
+                echo 'Building Docker image...'
+                def imageTag = "${env.BUILD_NUMBER}"
+                dockerImage = docker.build(
+                "seifseddik120/netflix-2024:${imageTag}",
+                "--build-arg TMDB_V3_API_KEY=${env.TMDB_V3_API_KEY} ."
+            )
+
                 }
             }
         }
