@@ -2,6 +2,7 @@ pipeline {
     environment {
         NodejsHome = tool "myNode"
         dockerHome = tool "myDocker"
+        TMDB_V3_API_KEY = credentials('TMDB_V3_API_KEY')
         PATH = "${dockerHome}/bin:${NodejsHome}/bin:${PATH}"
     }
     agent any
@@ -15,8 +16,9 @@ pipeline {
         stage('Build') {
             steps {
                 sh "npm install"
-            }
-        }
+                env.VITE_APP_TMDB_V3_API_KEY = env.TMDB_V3_API_KEY
+                
+                    }        }
         stage('Build Docker Image') {
             steps {
                 script {
