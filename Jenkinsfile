@@ -71,4 +71,15 @@ pipeline {
             }
         }
     }
+    post {
+        always {
+            emailext(
+                attachLog: true,
+                subject: "Jenkins Pipeline: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
+                body: "Build details: ${env.BUILD_URL}",
+                to: 'seifhesham2030@gmail.com'
+        )
+    }
+}
+
 }
