@@ -6,7 +6,7 @@ pipeline {
         OWASP_HOME = tool "myDp"
         NVD_KEY = credentials('NVD_KEY')
         TMDB_V3_API_KEY = credentials('TMDB_V3_API_KEY')
-        SONARQUBE_TOKEN = credentials('SonarNetflix') 
+        SONARQUBE_TOKEN = credentials('SonarNetflix')
         PATH = "${dockerHome}/bin:${NodejsHome}/bin:${SonarQubeHome}/bin:${OWASP_HOME}/bin:${PATH}"
     }
     agent any
@@ -29,7 +29,7 @@ pipeline {
             steps {
                 script {
                     echo 'Running OWASP Dependency-Check...'
-                    sh 'dependency-check.sh --project "Netlifex" --scan . --nvd.apiKey=${NVD_KEY}'
+                    sh 'dependency-check.sh --project "Netlifex" --scan . --nvdApiKey=${NVD_KEY}'
                 }
             }
             post {
