@@ -28,7 +28,7 @@ pipeline {
                 script {
                     echo 'Running SonarQube analysis...'
                     withSonarQubeEnv('mySonar') {
-                        sh 'sonar-scanner -Dsonar.projectKey=Netflix -Dsonar.sources=. -Dsonar.host.url=http://sweet_varahamihira:9000 -Dsonar.login=${SONARQUBE_TOKEN}'
+                        sh 'sonar-scanner -Dsonar.projectKey=Netflix -Dsonar.sources=. -Dsonar.host.url=http://localhost:9000 -Dsonar.login=${SONARQUBE_TOKEN}'
                     }
                 }
             }
