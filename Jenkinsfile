@@ -35,14 +35,6 @@ pipeline {
             }
             post {
                 always {
-                    script {
-                        echo 'Listing report files for debugging...'
-                        sh 'ls -la ./reports'
-                        
-                        echo 'Inspecting XML file for issues...'
-                        sh 'head -n 20 ./reports/dependency-check-report.xml'
-                        sh 'tail -n 20 ./reports/dependency-check-report.xml'
-                    }
                     dependencyCheckPublisher pattern: './reports/dependency-check-report.xml'
                 }
             }
