@@ -2,8 +2,9 @@ pipeline {
     environment {
         NodejsHome = tool "myNode"
         dockerHome = tool "myDocker"
+        SonarQubeHome = tool "mySonar"
         TMDB_V3_API_KEY = credentials('TMDB_V3_API_KEY')
-        PATH = "${dockerHome}/bin:${NodejsHome}/bin:${PATH}"
+        PATH = "${dockerHome}/bin:${NodejsHome}/bin:${SonarQubeHome}/bin:${PATH}"
     }
     agent any
 
@@ -21,16 +22,25 @@ pipeline {
                 }
             }
         }
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    echo 'Running SonarQube analysis...'
+                    withSonarQubeEnv('mySonar') {
+                        sh 'sonar-scanner'
+                    }
+                }
+            }
+        }
         stage('Build Docker Image') {
             steps {
                 script {
-                echo 'Building Docker image...'
-                def imageTag = "${env.BUILD_NUMBER}"
-                dockerImage = docker.build(
-                "seifseddik120/netflix-2024:${imageTag}",
-                "--build-arg TMDB_V3_API_KEY=${env.TMDB_V3_API_KEY} ."
-            )
-
+                    echo 'Building Docker image...'
+                    def imageTag = "${env.BUILD_NUMBER}"
+                    dockerImage = docker.build(
+                        "seifseddik120/netflix-2024:${imageTag}",
+                        "--build-arg TMDB_V3_API_KEY=${env.TMDB_V3_API_KEY} ."
+                    )
                 }
             }
         }
@@ -38,7 +48,7 @@ pipeline {
             steps {
                 script {
                     echo 'Pushing Docker image to DockerHub...'
-                    docker.withRegistry('https://index.docker.io/v1/', 'DockerHub') {
+                    docker.withRegistry('', 'DockerHub') {
                         dockerImage.push()
                     }
                 }
@@ -78,8 +88,7 @@ pipeline {
                 subject: "Jenkins Pipeline: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - ${currentBuild.currentResult}",
                 body: "Build details: ${env.BUILD_URL}",
                 to: 'seifhesham2030@gmail.com'
-        )
+            )
+        }
     }
-}
-
 }
