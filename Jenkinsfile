@@ -35,7 +35,10 @@ pipeline {
             steps {
                 script {
                     echo 'Running OWASP Dependency-Check...'
-                    sh 'dependency-check.sh --project "Netlifex" --scan . --nvdApiKey=${NVD_KEY} --format XML --out ./reports'
+                    sh '''
+                        delay=5  # Delay in seconds
+                        dependency-check.sh --project "Netlifex" --scan . --nvdApiKey=${NVD_KEY} --cveValidForHours 24 --format XML --out ./reports || sleep $delay
+                    '''
                 }
             }
             post {
