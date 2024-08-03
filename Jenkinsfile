@@ -29,12 +29,19 @@ pipeline {
             steps {
                 script {
                     echo 'Running OWASP Dependency-Check...'
-                    sh 'dependency-check.sh --project "Netlifex" --scan . --nvdApiKey=${NVD_KEY} --out ./reports'
+                    sh 'dependency-check.sh --project "Netlifex" --scan . --nvdApiKey=${NVD_KEY} --format XML --out ./reports'
                 }
             }
             post {
                 always {
-                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                    script {
+                        echo 'Listing report files for debugging...'
+                        sh 'ls -la ./reports'
+                        
+                        echo 'Inspecting report file contents...'
+                        sh 'cat ./reports/dependency-check-report.xml'
+                    }
+                    dependencyCheckPublisher pattern: './reports/dependency-check-report.xml'
                 }
             }
         }
