@@ -4,6 +4,7 @@ pipeline {
         dockerHome = tool "myDocker"
         SonarQubeHome = tool "mySonar"
         TMDB_V3_API_KEY = credentials('TMDB_V3_API_KEY')
+        SONARQUBE_TOKEN = credentials('SonarNetflix') 
         PATH = "${dockerHome}/bin:${NodejsHome}/bin:${SonarQubeHome}/bin:${PATH}"
     }
     agent any
@@ -27,7 +28,7 @@ pipeline {
                 script {
                     echo 'Running SonarQube analysis...'
                     withSonarQubeEnv('mySonar') {
-                        sh 'sonar-scanner'
+                        sh 'sonar-scanner -Dsonar.projectKey=Netflix -Dsonar.sources=. -Dsonar.host.url=http://sweet_varahamihira:9000 -Dsonar.login=${SONARQUBE_TOKEN}'
                     }
                 }
             }
