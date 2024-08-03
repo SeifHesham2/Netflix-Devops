@@ -36,8 +36,8 @@ pipeline {
                 script {
                     echo 'Running OWASP Dependency-Check...'
                     sh '''
-                        delay=5  # Delay in seconds
-                        dependency-check.sh --project "Netlifex" --scan . --nvdApiKey=${NVD_KEY} --cveValidForHours 24 --format XML --out ./reports || sleep $delay
+                        dependency-check.sh --project "Netlifex" --scan . --nvdApiKey=${NVD_KEY} --format XML --out ./reports
+                        sleep 5  # Delay to handle rate limiting
                     '''
                 }
             }
