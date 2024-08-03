@@ -34,7 +34,7 @@ pipeline {
             }
             post {
                 always {
-                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                    dependencyCheckPublisher pattern: '**/dependency-check-report.html'
                 }
             }
         }
