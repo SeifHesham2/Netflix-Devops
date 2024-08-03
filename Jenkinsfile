@@ -3,9 +3,10 @@ pipeline {
         NodejsHome = tool "myNode"
         dockerHome = tool "myDocker"
         SonarQubeHome = tool "mySonar"
+        OWASP_HOME = tool "myDp"
         TMDB_V3_API_KEY = credentials('TMDB_V3_API_KEY')
         SONARQUBE_TOKEN = credentials('SonarNetflix') 
-        PATH = "${dockerHome}/bin:${NodejsHome}/bin:${SonarQubeHome}/bin:${PATH}"
+        PATH = "${dockerHome}/bin:${NodejsHome}/bin:${SonarQubeHome}/bin:${OWASP_HOME}/bin:${PATH}"
     }
     agent any
 
@@ -20,6 +21,19 @@ pipeline {
                 script {
                     echo 'Installing npm dependencies...'
                     sh 'npm install'
+                }
+            }
+        }
+        stage('OWASP Dependency-Check') {
+            steps {
+                script {
+                    echo 'Running OWASP Dependency-Check...'
+                    sh 'dependency-check.sh --project "Netlifex" --scan .'
+                }
+            }
+            post {
+                always {
+                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
                 }
             }
         }
