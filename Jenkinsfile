@@ -29,7 +29,7 @@ pipeline {
             steps {
                 script {
                     echo 'Running OWASP Dependency-Check...'
-                    sh 'dependency-check.sh --project "Netlifex" --scan . --nvdApiKey=554835de-d7d7-415a-b4a9-03a1791ac847  --format XML --out ./reports'
+                    sh 'dependency-check.sh --project "Netlifex" --scan . --nvdApiKey=${NVD_KEY}  --format XML --out ./reports'
                 }
             }
             post {
