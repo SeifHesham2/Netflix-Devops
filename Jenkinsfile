@@ -12,12 +12,18 @@ pipeline {
     agent any
 
     stages {
+        stage('Clean Workspace') {
+            steps {
+                deleteDir()
+            }
+        }
 
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
+
         stage('Install Dependencies') {
             steps {
                 script {
@@ -26,19 +32,33 @@ pipeline {
                 }
             }
         }
+
         stage('OWASP Dependency-Check') {
             steps {
                 script {
-                    echo 'Running OWASP Dependency-Check...'
-                    sh 'dependency-check.sh --project "Netlifex" --scan . --nvdApiKey=${NVD_KEY}'
+                    echo 'Running OWASP Dependency-Check with verbose logging...'
+                    sh '''
+                        # Introduce a delay to handle rate limiting
+                        sleep 10
+                        dependency-check.sh --project "Netlifex" --scan . --nvdApiKey=${NVD_KEY} --format XML --out ./reports
+                    '''
                 }
             }
             post {
                 always {
+                    script {
+                        echo 'Listing report files for debugging...'
+                        sh 'ls -la ./reports'
+                        
+                        echo 'Inspecting XML file for issues...'
+                        sh 'head -n 20 ./reports/dependency-check-report.xml'
+                        sh 'tail -n 20 ./reports/dependency-check-report.xml'
+                    }
                     dependencyCheckPublisher pattern: './reports/dependency-check-report.xml'
                 }
             }
         }
+
         stage('SonarQube Analysis') {
             steps {
                 script {
@@ -49,6 +69,7 @@ pipeline {
                 }
             }
         }
+
         stage('Build Docker Image') {
             steps {
                 script {
@@ -61,6 +82,7 @@ pipeline {
                 }
             }
         }
+
         stage('Push Docker Image') {
             steps {
                 script {
@@ -71,6 +93,7 @@ pipeline {
                 }
             }
         }
+
         stage('Start Minikube') {
             steps {
                 script {
@@ -79,6 +102,7 @@ pipeline {
                 }
             }
         }
+
         stage('Deploy to Kubernetes') {
             steps {
                 script {
@@ -88,6 +112,7 @@ pipeline {
                 }
             }
         }
+
         stage('Verify Deployment') {
             steps {
                 script {
@@ -98,6 +123,7 @@ pipeline {
             }
         }
     }
+
     post {
         always {
             emailext(
